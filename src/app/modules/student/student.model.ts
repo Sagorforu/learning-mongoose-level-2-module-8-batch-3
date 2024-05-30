@@ -1,12 +1,13 @@
 import { Schema, model } from 'mongoose';
 import {
-  Guardian,
-  LocalGuardian,
-  Student,
-  UserName,
+  StudentModelForStatic,
+  TGuardian,
+  TLocalGuardian,
+  TStudent,
+  TUserName,
 } from './student.interface';
 
-const userNameSchema = new Schema<UserName>({
+const userNameSchema = new Schema<TUserName>({
   firstName: {
     type: String,
     required: [true, 'First name is required.'],
@@ -27,7 +28,7 @@ const userNameSchema = new Schema<UserName>({
   },
 });
 
-const guardianSchema = new Schema<Guardian>({
+const guardianSchema = new Schema<TGuardian>({
   fatherName: {
     type: String,
     required: [true, 'Father name is required.'],
@@ -62,7 +63,7 @@ const guardianSchema = new Schema<Guardian>({
   },
 });
 
-const localGuardianSchema = new Schema<LocalGuardian>({
+const localGuardianSchema = new Schema<TLocalGuardian>({
   name: {
     type: String,
     required: [true, 'Local guardian name is required.'],
@@ -86,12 +87,19 @@ const localGuardianSchema = new Schema<LocalGuardian>({
   },
 });
 
-const studentSchema = new Schema<Student>({
+const studentSchema = new Schema<TStudent, StudentModelForStatic>({
   id: {
     type: String,
     required: [true, 'Student id is required.'],
     unique: true,
     trim: true,
+  },
+
+  user: {
+    type: Schema.Types.ObjectId,
+    required: [true, 'User ID is required'],
+    unique: true,
+    ref: 'User',
   },
   name: {
     type: userNameSchema,
@@ -101,9 +109,9 @@ const studentSchema = new Schema<Student>({
   gender: {
     type: String,
     enum: {
-      values: ['Male', 'Female', 'others'],
+      values: ['male', 'female', 'others'],
       message:
-        "The gender field can only be one of the following: 'Male', 'Female', 'others'",
+        "The gender field can only be one of the following: 'male', 'female', 'others'",
     },
     required: true,
   },
@@ -153,11 +161,33 @@ const studentSchema = new Schema<Student>({
     trim: true,
   },
   profileImg: { type: String, unique: true },
-  isActive: {
-    type: String,
-    enum: ['active', 'block'],
-    default: 'active',
+  isDeleted: {
+    type: Boolean,
+    default: false,
   },
 });
 
-export const StudentModel = model<Student>('Student', studentSchema);
+// Query middleware
+studentSchema.pre('find', async function (next) {
+  this.find({ isDeleted: { $ne: true } });
+  next();
+});
+studentSchema.pre('findOne', async function (next) {
+  this.find({ isDeleted: { $ne: true } });
+  next();
+});
+studentSchema.pre('aggregate', async function (next) {
+  this.pipeline().unshift({ $match: { isDeleted: { $ne: true } } });
+  next();
+});
+
+//! Creating a static method
+studentSchema.statics.isUserExits = async function (id: string) {
+  const existingUser = await StudentModel.findOne({ id });
+  return existingUser;
+};
+
+export const StudentModel = model<TStudent, StudentModelForStatic>(
+  'Student',
+  studentSchema,
+);

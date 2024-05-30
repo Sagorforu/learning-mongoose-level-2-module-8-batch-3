@@ -3,8 +3,8 @@ import { studentControllers } from './student.controller';
 
 const router = express.Router();
 
-router.post('/create-student', studentControllers.createStudent);
 router.get('/', studentControllers.getStudent);
 router.get('/:studentId', studentControllers.getSingleStudent);
+router.get('/:studentId', studentControllers.deleteSingleStudent);
 
 export const studentRoutes = router;

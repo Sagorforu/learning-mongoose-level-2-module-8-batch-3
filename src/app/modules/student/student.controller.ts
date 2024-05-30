@@ -1,29 +1,7 @@
-import { Request, Response } from 'express';
+import { NextFunction, Request, Response } from 'express';
 import { studentServices } from './student.service';
-import studentValidationSchema from './student.zod.validation';
 
-const createStudent = async (req: Request, res: Response) => {
-  try {
-    const { student: studentData } = req.body;
-
-    const zodParsedData = studentValidationSchema.parse(studentData);
-
-    const result = await studentServices.createStudentIntoDB(zodParsedData);
-    res.status(200).json({
-      success: true,
-      message: 'Student create successfully',
-      data: result,
-    });
-  } catch (error) {
-    res.status(500).json({
-      success: false,
-      message: 'Something went wrong',
-      error: error,
-    });
-  }
-};
-
-const getStudent = async (req: Request, res: Response) => {
+const getStudent = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const result = await studentServices.getStudentIntoDB();
     res.status(200).json({
@@ -32,10 +10,14 @@ const getStudent = async (req: Request, res: Response) => {
       data: result,
     });
   } catch (error) {
-    console.log(error);
+    next(error);
   }
 };
-const getSingleStudent = async (req: Request, res: Response) => {
+const getSingleStudent = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
   try {
     const { studentId } = req.params;
     const result = await studentServices.getSingleStudentIntoDB(studentId);
@@ -45,12 +27,29 @@ const getSingleStudent = async (req: Request, res: Response) => {
       data: result,
     });
   } catch (error) {
-    console.log(error);
+    next(error);
+  }
+};
+const deleteSingleStudent = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  try {
+    const { studentId } = req.params;
+    const result = await studentServices.deleteSingleStudentIntoDB(studentId);
+    res.status(200).json({
+      success: true,
+      message: 'Single student delete successfully',
+      data: result,
+    });
+  } catch (error) {
+    next(error);
   }
 };
 
 export const studentControllers = {
-  createStudent,
   getStudent,
   getSingleStudent,
+  deleteSingleStudent,
 };
