@@ -62,42 +62,48 @@ const localGuardianValidationSchema = z.object({
 });
 
 // Define the Student schema
-const studentValidationSchema = z.object({
-  id: z.string().trim(),
-  password: z.string().max(20),
-  name: userNameValidationSchema,
-  gender: z.enum(['Male', 'Female', 'others'], {
-    errorMap: () => ({
-      message:
-        "The gender field can only be one of the following: 'Male', 'Female', 'others'",
+export const createStudentValidationSchema = z.object({
+  body: z.object({
+    password: z.string().max(20),
+    student: z.object({
+      name: userNameValidationSchema,
+      gender: z.enum(['male', 'female', 'others'], {
+        errorMap: () => ({
+          message:
+            "The gender field can only be one of the following: 'male', 'female', 'others'",
+        }),
+      }),
+      dateOfBirth: z.string().optional(),
+      email: z
+        .string()
+        .email('Invalid email format')
+        .trim()
+        .nonempty('Email is required.'),
+      contactNo: z.string().trim().nonempty('Contact no is required.'),
+      emergencyContactNo: z
+        .string()
+        .trim()
+        .nonempty('Emergency contact no is required.'),
+      bloodGroup: z
+        .enum(['A+', 'A-', 'B+', 'B-', 'O+', 'O-', 'AB+', 'AB-'], {
+          errorMap: () => ({ message: '{VALUE} is not valid.' }),
+        })
+        .optional(),
+      presentAddress: z
+        .string()
+        .trim()
+        .nonempty('Present address is required.'),
+      permanentAddress: z
+        .string()
+        .trim()
+        .nonempty('Permanent address is required.'),
+      guardian: guardianValidationSchema,
+      localGuardian: localGuardianValidationSchema,
+      profileImg: z.string().optional(),
     }),
   }),
-  dateOfBirth: z.string().trim().optional(),
-  email: z
-    .string()
-    .email('Invalid email format')
-    .trim()
-    .nonempty('Email is required.'),
-  contactNo: z.string().trim().nonempty('Contact no is required.'),
-  emergencyContactNo: z
-    .string()
-    .trim()
-    .nonempty('Emergency contact no is required.'),
-  bloodGroup: z
-    .enum(['A+', 'A-', 'B+', 'B-', 'O+', 'O-', 'AB+', 'AB-'], {
-      errorMap: () => ({ message: '{VALUE} is not valid.' }),
-    })
-    .optional(),
-  presentAddress: z.string().trim().nonempty('Present address is required.'),
-  permanentAddress: z
-    .string()
-    .trim()
-    .nonempty('Permanent address is required.'),
-  guardian: guardianValidationSchema,
-  localGuardian: localGuardianValidationSchema,
-  profileImg: z.string().url('Invalid URL format').optional(),
-  isActive: z.enum(['active', 'block']).default('active'),
-  isDeleted: z.boolean(),
 });
 
-export default studentValidationSchema;
+export const studentValidations = {
+  createStudentValidationSchema,
+};
