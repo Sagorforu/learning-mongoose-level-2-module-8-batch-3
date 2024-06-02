@@ -98,7 +98,6 @@ const studentSchema = new Schema<TStudent, StudentModelForStatic>({
   user: {
     type: Schema.Types.ObjectId,
     required: [true, 'User ID is required'],
-    unique: true,
     ref: 'User',
   },
   name: {
@@ -125,7 +124,6 @@ const studentSchema = new Schema<TStudent, StudentModelForStatic>({
   contactNo: {
     type: String,
     required: [true, 'Contact no is required.'],
-    unique: true,
     trim: true,
   },
   emergencyContactNo: {
@@ -160,7 +158,11 @@ const studentSchema = new Schema<TStudent, StudentModelForStatic>({
     required: [true, 'Local guardian is required.'],
     trim: true,
   },
-  profileImg: { type: String, unique: true },
+  profileImg: { type: String },
+  admissionSemester: {
+    type: Schema.Types.ObjectId,
+    ref: 'AcademicSemester',
+  },
   isDeleted: {
     type: Boolean,
     default: false,
