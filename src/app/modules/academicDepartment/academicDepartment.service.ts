@@ -1,3 +1,4 @@
+import AppError from '../../errors/appError';
 import { TAcademicDepartment } from './academicDepartment.interface';
 import { AcademicDepartmentModel } from './academicDepartment.model';
 
@@ -6,17 +7,19 @@ const createAcademicDepartmentIntoDB = async (payload: TAcademicDepartment) => {
     name: payload.name,
   });
   if (isDepartmentExist) {
-    throw new Error('This department is already exit!!');
+    throw new AppError(409, 'This department is already exit!!');
   }
   const result = await AcademicDepartmentModel.create(payload);
   return result;
 };
 const getAcademicDepartmentsIntoDB = async () => {
-  const result = await AcademicDepartmentModel.find();
+  const result =
+    await AcademicDepartmentModel.find().populate('academicFaculty');
   return result;
 };
 const getSingleAcademicDepartmentIntoDB = async (id: string) => {
-  const result = await AcademicDepartmentModel.findById(id);
+  const result =
+    await AcademicDepartmentModel.findById(id).populate('academicFaculty');
   return result;
 };
 const updateAcademicDepartmentIntoDB = async (
